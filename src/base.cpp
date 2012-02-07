@@ -173,7 +173,7 @@ void * LAMHandler::staticCallback(void * a) {
 			break;
 		h->_cb(h->_data);
 	}
-	NULL;
+	return NULL;
 }
 
 LAMHandler::LAMHandler(dfCamacModuleBase & module, Callback cb, void * data):

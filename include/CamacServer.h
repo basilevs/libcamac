@@ -11,12 +11,11 @@
 #include <stdint.h>
 #include <iosfwd>
 
-namespace Camac {
-
 typedef uint8_t u8_t;
 typedef uint16_t u16_t;
 typedef uint32_t u32_t;
 
+namespace Camac {
 
 // stores timeout in seconds
 // INF means no timeout
