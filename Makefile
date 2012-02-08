@@ -3,7 +3,11 @@ CAMAC_ABSTRACT_BASE?=$(dir $(CAMAC_ABSTRACT_MAKEFILE))
 
 CPPFLAGS+=-I$(CAMAC_ABSTRACT_BASE)include
 CPPFLAGS+=-I$(CAMAC_ABSTRACT_BASE)FedorovClient
+
+#The Cheblakov server requires lsi6camac.h that can be found in https://github.com/basilevs/lsi6
+#The CHEBLAKOV variable point to the directory that contains this file
 CHEBLAKOV?=$(CAMAC_ABSTRACT_BASE)../../cheblakov
+
 CPPFLAGS+=-I$(CHEBLAKOV)
 
 VPATH+=$(CAMAC_ABSTRACT_BASE)src
