@@ -15,10 +15,9 @@
 
 # include <camac/base_defs.h>
 #include <stdint.h>
+#include <stddef.h>  //size_t
 //# include <camac/event_bitmask.h>
 
-
-typedef u32_t size_t;
 typedef unsigned long ulong;
 typedef size_t df_timeout_t;
 
