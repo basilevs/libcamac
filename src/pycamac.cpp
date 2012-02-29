@@ -8,8 +8,8 @@ using namespace std;
 namespace PyCamac {
 typedef Camac::Result Result;
 typedef Camac::AF AF;
-typedef Camac::u16_t u16_t;
-typedef Camac::u32_t u32_t;
+typedef uint16_t u16_t;
+typedef uint32_t u32_t;
 
 class Error: public std::runtime_error {
 	Result _code;
