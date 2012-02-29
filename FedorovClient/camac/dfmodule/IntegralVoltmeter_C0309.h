@@ -19,7 +19,7 @@ public:
 private:
 	__u8 Control;		//control word
 	enum {
-		afRead			= CAMAC_MAKE_AF(0, 0),
+		afRead			= CAMAC_MAKE_AF24(0, 0),
 		afControlRead	= CAMAC_MAKE_AF(0, 2),
 		afControlWrite	= CAMAC_MAKE_AF(0,16),
 		afStart			= CAMAC_MAKE_AF(0,26),
@@ -68,7 +68,7 @@ public:
 	int SetControl(const bool Scale, const __u8 Time);
 	int ReadControl(bool* Scale, __u8* Time);
 
-	int ReadVoltage(int* v);
+	int ReadVoltage(double & v);
 };
 
 inline IV_C0309::~IV_C0309() { Unbind();}

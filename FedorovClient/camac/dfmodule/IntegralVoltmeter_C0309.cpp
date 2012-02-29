@@ -1,10 +1,12 @@
-
+#include <assert.h>
 #include <stdio.h>
 #include "IntegralVoltmeter_C0309.h"
 #include <camac/df/std_lcm.h>
 #include <camac/df/rc2test.h>
 #include <dfcommonxx/bad.h>
 #include <limits.h>
+
+#include <limits> //NaN
 
 const char IV_C0309::Type[]="IV_C0309   ";
 
@@ -51,8 +53,8 @@ dev_test_state IV_C0309::Test(void)
 	rc = AF(afCheckLAM);
 	if ( rc & (CAMAC_CC_ERRORS & ~CAMAC_CC_NOT_Q) )
 		return dfcamac_rc2test(rc & ~CAMAC_CC_NOT_Q);
-	if ( !(rc & CAMAC_CC_NOT_Q) )
-		return DEV_TEST_BROKEN;
+//	if ( !(rc & CAMAC_CC_NOT_Q) ) // Fails to return not Q after measurement
+//		return DEV_TEST_BROKEN;
 
 	return DEV_TEST_OK;
 }
@@ -106,17 +108,18 @@ int IV_C0309::ReadControl(bool* Scale, __u8* Time)
 #include <iostream>
 #include <iomanip>
 
-int IV_C0309::ReadVoltage(int* v)
+int IV_C0309::ReadVoltage(double & v)
 {
 	__u32 code;
-	*v = USHRT_MAX;
+	v = std::numeric_limits<double>::quiet_NaN();
 	int rc=AF(afRead,&code);
 	if ( rc&CAMAC_CC_ERRORS ) return rc;
-	bool D = (Control>>3)&ScaleMask;
+	int D = (Control>>3)&ScaleMask;
+	assert(D == 0 || D == 1);
 	__u8 T = Control&TimeMask;
 //	clog <<  "D=" << D << ", T=" << (int) T << ", code=" << code 
 //		 << ", codeint=" << static_cast<int>(code/(1<<T)) << dec << ", 9th=" << 022000 <<endl;
-	*v =static_cast<int>(( 022000 - (code/(1<<T)) ) / (1+15*D));
+	v = ( double(022000) - (double(code)/(1<<T)) ) / (1+15*D);
 //	clog << "voltage = " << *v << endl;
 //	*v=static_cast<__u16>(code);
 	return rc;
