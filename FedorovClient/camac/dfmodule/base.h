@@ -45,14 +45,14 @@ protected:
     int Unbind(void);
 
 
-    int Lock(int lockmask, df_timeout_t* timeout=DF_TIMEOUT_PTR_INF)
+    int Lock(int , df_timeout_t* =DF_TIMEOUT_PTR_INF)
     { return 0;}
 
-    int Unlock(int lockmask)
+    int Unlock(int )
     { return 0;}
 
 
-    int LockStation(df_timeout_t* timeout=DF_TIMEOUT_PTR_INF)
+    int LockStation(df_timeout_t* =DF_TIMEOUT_PTR_INF)
     { return 0; }
 
     int UnlockStation(void)
@@ -63,7 +63,7 @@ protected:
 
     int Verify(void) { return 0; }
 
-    dev_test_state Test(int logfd = -1)
+    dev_test_state Test(int  = -1)
     { return DEV_TEST_SUCCESS; }
 
 protected:
@@ -107,7 +107,7 @@ protected:
     int CompleteLAM(void) {return CAMAC_CC_OK;}
 //    { return camac_kernel_complete_lam(stfd); }
 
-    int SetEventsMask(ushort _events_mask) {return CAMAC_CC_OK;}
+    int SetEventsMask(ushort ) {return CAMAC_CC_OK;}
     int GetEventsMask(void) const {return 0;}
     int GetEvents    (void) const {return 0;}
 
