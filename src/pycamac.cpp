@@ -7,6 +7,7 @@ using namespace std;
 
 namespace PyCamac {
 typedef Camac::Result Result;
+typedef Camac::Timeout Timeout;
 typedef Camac::AF AF;
 typedef uint16_t u16_t;
 typedef uint32_t u32_t;
@@ -73,6 +74,16 @@ class Crate {
 	Camac::Crate & _crate;
 	public:
 	Crate(Camac::Crate & crate): _crate(crate) {}
+	void raiseIfError(Result res) {
+		if (res & Camac::CC_ERRORS)
+			throw Error(res);
+	}
+        void C(Timeout  timeout = 0) {
+		raiseIfError(_crate.C(timeout));
+	}
+        void Z(Timeout  timeout = 0) {
+		raiseIfError(_crate.Z(timeout));
+	}
 	Module getModule(int idx) {
 		Camac::Module * m = _crate.getModule(idx);
 		if (!m)
@@ -133,6 +144,8 @@ BOOST_PYTHON_MODULE(pycamac)
 		.def("afr16", &PyCamac::Module::afr16)
 		.def("afr24", &PyCamac::Module::afr24);
 	class_<PyCamac::Crate>("Crate", no_init)
+		.def("c", &PyCamac::Crate::C)
+		.def("z", &PyCamac::Crate::Z)
 		.def("getModule", &PyCamac::Crate::getModule);
 	class_<PyCamac::Interface>("Interface", no_init)
 		.def("getCrate", &PyCamac::Interface::getCrate);
