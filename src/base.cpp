@@ -187,6 +187,6 @@ LAMHandler::LAMHandler(dfCamacModuleBase & module, Callback cb, void * data):
 
 LAMHandler::~LAMHandler() {
 	exitFlag = true;
-	void * rv = rv;
+	void * rv;
 	pthread_join(_thread, &rv);
 }
