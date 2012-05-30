@@ -47,7 +47,6 @@ CamacAddressParser::CamacAddressParser(const CamacAddressParser & that)
 int CamacAddressParser::parse(const char * input) {
 	if (!input)
 		return -1;
-	size_t len = strlen(input);
 	_address.driver_name = 0;
 	_address.station = _address.iface = _address.crate = 255;
 	istringstream s(input);
@@ -83,7 +82,9 @@ bool operator < (const CamacAddressParser & a1, const CamacAddressParser & a2) {
 	const camac_address & v1 = a1.address(), & v2 = a2.address();
 	int res = 0;
 	if (v1.driver_name && v2.driver_name) {
-		strcmp(v1.driver_name, v2.driver_name);
+		int c = strcmp(v1.driver_name, v2.driver_name);
+		if (c!=0)
+			return c < 0;
 	} else {
 		if (!v1.driver_name)
 			return true;
