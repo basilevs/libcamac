@@ -142,7 +142,9 @@ BOOST_PYTHON_MODULE(pycamac)
 		.def("afw24", &PyCamac::Module::afw24)
 		.def("af", &PyCamac::Module::af)
 		.def("afr16", &PyCamac::Module::afr16)
-		.def("afr24", &PyCamac::Module::afr24);
+		.def("afr24", &PyCamac::Module::afr24)
+		.def("ignoreErrors", &PyCamac::Module::ignoreErrors)
+;
 	class_<PyCamac::Crate>("Crate", no_init)
 		.def("c", &PyCamac::Crate::C)
 		.def("z", &PyCamac::Crate::Z)
