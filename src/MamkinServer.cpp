@@ -1,10 +1,3 @@
-/*
- * MamkinServer.cpp
- *
- *  Created on: 14.09.2010
- *      Author: gulevich
- */
-
 #include "MamkinServer.h"
 #include "lsi6camac.h"
 #include <utility>
