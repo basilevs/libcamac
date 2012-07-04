@@ -1,4 +1,5 @@
 #include <math.h>
+#include <assert.h>
 
 #include "U0302.h"
 #include <camac/df/std_lcm.h>
