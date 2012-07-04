@@ -22,6 +22,9 @@
 namespace Camac {
 	class Module;
 }
+/**
+ * Fedorov userspace C++ API imitation.
+ */
 class dfCamacModuleBase
 {
 	Camac::Module * _module;
