@@ -10,7 +10,7 @@ Coincide_C0308::Coincide_C0308()
 	: Base(Type, &dfcamac_lcm_none)
 {
 	for(size_t i=0; i<=maxChannel; i++)
-		SettingAndMask[i] = badAndMask;
+		SettingAndMask[i] = (u8_t)badAndMask;
 	SettingOrMask = badOrMask;
 }
 
