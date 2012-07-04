@@ -3,7 +3,7 @@
 
 <cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage2">
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-		<configuration artifactName="camac" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib" description="" id="cdt.managedbuild.toolchain.gnu.base.1801176729" name="Default" parent="org.eclipse.cdt.build.core.emptycfg">
+		<configuration artifactExtension="a" artifactName="camac" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib" description="" id="cdt.managedbuild.toolchain.gnu.base.1801176729" name="Default" parent="org.eclipse.cdt.build.core.emptycfg">
 			<folderInfo id="cdt.managedbuild.toolchain.gnu.base.1801176729.1583283597" name="/" resourcePath="">
 				<toolChain id="cdt.managedbuild.toolchain.gnu.base.1091622915" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.base" unusedChildren="cdt.managedbuild.tool.gnu.c.linker.base;cdt.managedbuild.tool.gnu.c.compiler.base;cdt.managedbuild.tool.gnu.assembler.base">
 					<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.target.gnu.platform.base.1278166220" name="Debug Platform" osList="linux,hpux,aix,qnx" superClass="cdt.managedbuild.target.gnu.platform.base"/>

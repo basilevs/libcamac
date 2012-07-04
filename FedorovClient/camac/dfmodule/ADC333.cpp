@@ -39,7 +39,7 @@ int ADC333::BeginSingleRun()
 	try {
 		_parameters.cycling = false;
 		Start();
-	} catch (CamacError e) {
+	} catch (CamacError & e) {
 		return e.code;
 	}
 	return CAMAC_CC_OK;
@@ -88,7 +88,7 @@ int ADC333::Read(unsigned  channel, std::vector<double> & data)
 
 static unsigned tickToNanoSeconds[8] = {500, 1000, 2000, 4000, 8000, 16000, 32000, 0};
 
-unsigned ADC333::GetTickInNanoSeconds()
+unsigned ADC333::GetTickInNanoSeconds() const
 {
 	if (_parameters.tick > 7)
 		handleCamacCode(CAMAC_CC_VERIFICATION_ERROR);

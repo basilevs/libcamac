@@ -31,12 +31,12 @@ public:
     //Reads data for channel
     int Read(unsigned channel, std::vector<double> & data);
 
+    void WaitReady();
+
     /** Returns a period between measurements in microseconds.
      * Returns 0 for external ticks.
      * */
-    unsigned GetTickInNanoSeconds();
-
-	//!!! All public methods below stop currently active processing and delete obtained data.
+    unsigned GetTickInNanoSeconds() const;
 
     /** Enables channel readout.
      * Accepts array at least 4 booleans long.
@@ -73,7 +73,6 @@ private:
     unsigned ReadLimits();
     void WriteRegister(unsigned index, unsigned value);
     unsigned ReadRegister(unsigned index);
-    void WaitReady();
     void Halt();
     void Start();
     void UnHalt();
