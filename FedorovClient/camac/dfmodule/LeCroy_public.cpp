@@ -22,8 +22,6 @@ LeCroy::LeCroy()
 		VoltCode[i] = 0;
 }
 
-static camac_address addr;
-
 int LeCroy::Init(__u8 mainframe)
 {
 	int rc=Base::Init()
