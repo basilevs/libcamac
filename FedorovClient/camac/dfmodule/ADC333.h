@@ -11,7 +11,16 @@
 #include <vector>
 #include "base.h"
 
-
+/**
+ * ADC333 protocol implementation.
+ * http://kedr-wiki.inp.nsk.su/index.php/ADC333
+ *
+ * Usage:
+ * Bind()
+ * Init()
+ * SetTickInNanoSeconds()
+ * Set
+ */
 class ADC333: public dfCamacModuleBase {
 public:
 	ADC333();
@@ -26,37 +35,40 @@ public:
      *  The process will stop itself when no more space will be available in the buffer.
      *  The method returns immediately.
      */
-    int BeginSingleRun();
+    int StartSingleRun();
 
     //Reads data for channel
+    //If channel is disabled of invalid returns CAMAC_CC_INVALID_ARG
     int Read(unsigned channel, std::vector<double> & data);
-
-    void WaitReady();
 
     /** Returns a period between measurements in microseconds.
      * Returns 0 for external ticks.
      * */
     unsigned GetTickInNanoSeconds() const;
+    void SetTickInNanoSeconds(unsigned);
 
     /** Enables channel readout.
      * Accepts array at least 4 booleans long.
      */
     int EnableChannels(bool channels[]);
-    void SetTickInNanoSeconds(unsigned);
+
+    /// Returns CAMAC_CC_BOOL if the module is busy.
+    int IsBusy();
 
 	virtual ~ADC333();
-private:
 	enum {CHAN_COUNT=4};
+private:
 	struct Parameters {
 		struct Channel {
 			bool     enabled;
-			unsigned scale;     // In 0..3
+			unsigned gain;     // Gain mode from 0..3
+			Channel();
 		};
 		Channel channels[CHAN_COUNT];
 		unsigned tick;			// In 0..7
-		unsigned limits;
 		bool writeChannelNumbers;
 		bool cycling;
+		Parameters();
 		bool SetStatus(unsigned status);
 		bool SetLimits(unsigned limits);
 		unsigned GetStatus() const;

@@ -10,6 +10,10 @@
 
 #include <camac/dfmodule/base.h>
 #include "CamacServer.h"
+
+#include <stdexcept>
+
+#include <sys/time.h>
 #include <assert.h>
 #include <pthread.h>
 //#include <camac/df/open_station.h>
@@ -29,7 +33,17 @@ Camac::AF convert(const camac_af_t & iAF) {
 	return rv;
 }
 
-Timeout convert(const df_timeout_t * timeout) {
+void convertTimeoutToFedorov(Timeout left,  df_timeout_t * oTimeout) {
+	if (oTimeout == DF_TIMEOUT_PTR_INF || oTimeout == DF_TIMEOUT_PTR_0)
+		return;
+	if (std::numeric_limits<Timeout>::infinity() == left) {
+		*oTimeout = DF_TIMEOUT_INF;
+		return;
+	}
+	*oTimeout = left * 1000;
+}
+
+Timeout convertTimeoutFromFedorov(const df_timeout_t * timeout) {
 	if (timeout == DF_TIMEOUT_PTR_INF)
 		return std::numeric_limits<Timeout>::infinity();
 	if (timeout == DF_TIMEOUT_PTR_0)
@@ -58,11 +72,17 @@ dfCamacModuleBase::~dfCamacModuleBase()
 
 int dfCamacModuleBase::Bind(const camac_address& addr, df_timeout_t* , int)
 {
-	Unbind();
-	Server * server = Server::getDefault();
-	assert(server);
-	_module = &(getModule(server, addr.iface, addr.crate, addr.station));
-	_station = addr.station;
+	try {
+		Unbind();
+		Server * server = Server::getDefault();
+		assert(server);
+
+		_module = &(getModule(server, addr.iface, addr.crate, addr.station));
+		_station = addr.station;
+	} catch (...) {
+		return -1;
+	}
+
 
 	//TODO: add thread safety
     return CAMAC_CC_OK;
@@ -145,22 +165,92 @@ int dfCamacModuleBase::C(df_timeout_t* timeout) {
 	if (!_module) {
 		return CAMAC_CC_NOTBINDED;
 	}
-	return _module->crate().C(convert(timeout));
+	return _module->crate().C(convertTimeoutFromFedorov(timeout));
 }
 
 int dfCamacModuleBase::Z(df_timeout_t* timeout) {
 	if (!_module) {
 		return CAMAC_CC_NOTBINDED;
 	}
-	return _module->crate().Z(convert(timeout));
+	return _module->crate().Z(convertTimeoutFromFedorov(timeout));
 }
+
+static double now() {
+	timeval tv;
+	if (gettimeofday(&tv, 0) != 0) {
+		throw std::runtime_error("gettimeofday failed");
+	}
+
+	return tv.tv_sec + tv.tv_usec*1e-6;
+}
+
 
 int dfCamacModuleBase::WaitLAM(df_timeout_t* timeout) {
 	if (!_module) {
 		return CAMAC_CC_NOTBINDED;
 	}
-	Timeout t = convert(timeout);
-	return _module->waitLAM(t);
+	Timeout t = convertTimeoutFromFedorov(timeout);
+	if (t <= 0) {
+		return _module->waitLAM(0);
+	}
+	double targetTime = t + now();
+	while (targetTime >= now()) {
+		int rv = _module->waitLAM(targetTime - now());
+		Timeout time_left = targetTime - now();
+		convertTimeoutToFedorov(time_left, timeout);
+		if (rv & CAMAC_CC_ERRORS) {
+			return rv;
+		}
+		if (!(rv & CAMAC_CC_BOOL)) // timeout
+			return rv;
+		if (!_lcm) {
+			return CAMAC_CC_BOOL;
+		} else {
+			if (_lcm->method == CAMAC_LAM_CHECK_NONE)
+				return CAMAC_CC_BOOL;
+
+			u32_t tmp = 0;
+			rv = 0;
+
+			switch (_lcm->method) {
+			case CAMAC_LAM_CHECK_BY_Q:
+			case CAMAC_LAM_CHECK_BY_NOTQ:
+				rv = AF(_lcm->af);
+				break;
+			case CAMAC_LAM_CHECK_BY_BITMASK:
+			case CAMAC_LAM_CHECK_BY_NOTBITMASK:
+				rv = AF(_lcm->af, &tmp);
+				break;
+			default:
+				return CAMAC_CC_INVALID_ARG;
+			}
+			if (rv & CAMAC_CC_ERRORS)
+				return rv;
+
+			switch (_lcm->method) {
+			case CAMAC_LAM_CHECK_BY_Q:
+				if (rv & CAMAC_CC_NOT_Q)
+					break;
+				return CAMAC_CC_BOOL;
+			case CAMAC_LAM_CHECK_BY_NOTQ:
+				if (rv & CAMAC_CC_NOT_Q)
+					return CAMAC_CC_BOOL;
+				break;
+			case CAMAC_LAM_CHECK_BY_BITMASK:
+				if (tmp & _lcm->bitmask)
+					return CAMAC_CC_BOOL;
+				break;
+			case CAMAC_LAM_CHECK_BY_NOTBITMASK:
+				if (tmp & _lcm->bitmask)
+					break;
+				return CAMAC_CC_BOOL;
+			default:
+				return CAMAC_CC_INVALID_ARG;
+			}
+			continue;
+		}
+	}
+	return CAMAC_CC_BOOL;
 }
 
 typedef LAMHandler::Callback Callback;
@@ -182,7 +272,9 @@ LAMHandler::LAMHandler(dfCamacModuleBase & module, Callback cb, void * data):
 		_data(data),
 		exitFlag(false)
 {
-	int result = pthread_create(&_thread, NULL, staticCallback, this);
+	if (pthread_create(&_thread, NULL, staticCallback, this)) {
+		throw std::runtime_error("Thread creation failed.");
+	}
 }
 
 LAMHandler::~LAMHandler() {

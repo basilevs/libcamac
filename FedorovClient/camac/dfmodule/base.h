@@ -19,6 +19,8 @@
 #include <limits>
 
 
+#define CAMAC_MODULE_MOCK
+
 namespace Camac {
 	class Module;
 }

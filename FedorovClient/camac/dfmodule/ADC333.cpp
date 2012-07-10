@@ -34,7 +34,7 @@ int ADC333::StartCycle()
 	return CAMAC_CC_OK;
 }
 
-int ADC333::BeginSingleRun()
+int ADC333::StartSingleRun()
 {
 	try {
 		_parameters.cycling = false;
@@ -78,7 +78,7 @@ int ADC333::Read(unsigned  channel, std::vector<double> & data)
 				if (((code >> 14) & 3) != channel)
 					handleCamacCode(CAMAC_CC_VERIFICATION_ERROR);
 			}
-			data.push_back((code & 0x7F) << _parameters.channels[channel].scale);
+			data.push_back((code & 0x7F) << _parameters.channels[channel].gain);
 		}
 	} catch(CamacError &e) {
 		return e.code;
@@ -178,20 +178,6 @@ void ADC333::ReadParameters(Parameters & p)
 	}
 }
 
-/** Waits for non-buzy state and halts then */
-void ADC333::WaitReady()
-{
-
-	unsigned status;
-	while(true) {
-		status = ReadStatus();
-		if (!(status & BUSY_MASK))
-			break;
-		handleCamacCode(WaitLAM(DF_TIMEOUT_PTR_INF));
-	}
-	WriteStatus(status | HALT_MASK);
-}
-
 void ADC333::Halt()
 {
 	WriteStatus(ReadStatus()| HALT_MASK);
@@ -206,13 +192,24 @@ void ADC333::Start()
 {
 	Reset();
 	UnHalt();
-	camac_af_t af = CAMAC_MAKE_AF(0, 25);
+	const camac_af_t af = CAMAC_MAKE_AF(0, 25);
 	handleCamacCode(AF(af));
+}
+
+int ADC333::IsBusy()
+{
+	try {
+		if (ReadStatus() & BUSY_MASK)
+			return CAMAC_CC_BOOL;
+		return CAMAC_CC_OK;
+	} catch (CamacError & e) {
+		return e.code;
+	}
 }
 
 void ADC333::Readout()
 {
-	WaitReady();
+	Halt();
 	unsigned status = ReadStatus();
 	ReadParameters(_parameters);
 	long stop_position = -1;
@@ -224,6 +221,13 @@ void ADC333::Readout()
 	for (long i = START_ADDRESS; i > stop_position; --i) {
 		_buffer.push_back(ReadRegister(0));
 	}
+}
+
+ADC333::Parameters::Parameters():
+	tick(7), //32 us
+	writeChannelNumbers(true),
+	cycling(false)
+{
 }
 
 bool ADC333::Parameters::SetStatus(unsigned  status)
@@ -258,7 +262,7 @@ bool ADC333::Parameters::SetLimits(unsigned  limits)
 	if (limits & ~0x7F)
 		return false;
 	for (int i = 0; i < CHAN_COUNT; ++i) {
-		channels[i].scale = (limits >> (i * 2)) & 3;
+		channels[i].gain = (limits >> (i * 2)) & 3;
 	}
 	tick = (limits >> 8) & 7;
 	return true;
@@ -268,14 +272,22 @@ unsigned ADC333::Parameters::GetLimits() const
 {
 	unsigned rv = 0;
 	for (int i = 0; i < CHAN_COUNT; ++i) {
-		assert(channels[i].scale < 4);
-		rv |= channels[i].scale << (i*2);
+		assert(channels[i].gain < 4);
+		rv |= channels[i].gain << (i*2);
 	}
 	assert(tick < 8);
 	rv |= tick << 8;
 	assert(!(rv & ~0x7F));
 	return rv;
 }
+
+ADC333::Parameters::Channel::Channel():
+		enabled(false),
+		gain(0) //Lowest gain possible to maximize voltage range
+{
+}
+
+
 
 
 
