@@ -21,11 +21,14 @@ void CamacAddressParser::updateDriver(const string & name) {
 }
 
 static void init(camac_address & a) {
-	a = {0};
+	a.driver_name = 0;
+	a.station = a.iface = a.crate = 255;
 }
+
 CamacAddressParser::CamacAddressParser() {
 	init(_address);
 }
+
 CamacAddressParser::CamacAddressParser(const char * input)
 {
 	init(_address);

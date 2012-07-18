@@ -7,6 +7,11 @@ using namespace std;
 
 enum {HALT_MASK = 1, BUSY_MASK=1<<3, CYCLIC_MASK=1<<1, START_ADDRESS=65535, OVERFILL_MASK=1<<2};
 
+#ifndef CAMAC_MODULE_MOCK
+enum {CAMAC_CC_OK = 0};
+#endif
+
+
 struct CamacError {
 	int code;
 };
@@ -75,7 +80,7 @@ int ADC333::Read(unsigned  channel, std::vector<double> & data)
 				continue;
 			}
 			if (_parameters.writeChannelNumbers) {
-				if (((code >> 14) & 3) != channel)
+				if (unsigned((code >> 14) & 3) != channel)
 					handleCamacCode(CAMAC_CC_VERIFICATION_ERROR);
 			}
 			data.push_back((code & 0x7F) << _parameters.channels[channel].gain);

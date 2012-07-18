@@ -8,8 +8,9 @@
 #ifndef ADC333_H_
 #define ADC333_H_
 
+#include <inttypes.h>
 #include <vector>
-#include "base.h"
+#include <base.h>
 
 /**
  * ADC333 protocol implementation.
@@ -26,6 +27,9 @@ public:
 	ADC333();
 	using dfCamacModuleBase::Bind;
 	using dfCamacModuleBase::Init;
+	#ifndef CAMAC_MODULE_MOCK
+	using dfCamacModuleBase::GetFD;
+	#endif
     /** Immediately starts cycling measurement.
      *  Continues until stop signal is received.
      *  The method returns immediately.
