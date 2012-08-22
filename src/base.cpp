@@ -1,13 +1,3 @@
-/*
-	<camac/dfmodule/base.cc>
-	$Id: base.cc,v 1.2 2009-12-15 06:08:15 gulevich Exp $
-
-	CAMAC module base class
-
-	(C) 1999 Dmitry A. Fedorov <dm.fedorov@gmail.com>
-	Copying policy: GNU LGPL
-*/
-
 #include <camac/dfmodule/base.h>
 #include "CamacServer.h"
 
@@ -79,7 +69,10 @@ int dfCamacModuleBase::Bind(const camac_address& addr, df_timeout_t* , int)
 
 		_module = &(getModule(server, addr.iface, addr.crate, addr.station));
 		_station = addr.station;
-	} catch (...) {
+	} catch (exception & e) {
+		cerr << "Bind to address " << addr.iface << "/" << 
+addr.crate << "/" << addr.station << " failed: " << e.what() 
+<< endl;
 		return -1;
 	}
 

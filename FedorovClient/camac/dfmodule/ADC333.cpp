@@ -1,6 +1,7 @@
 #include "ADC333.h"
 #include <assert.h>
 #include <limits>
+#include <iostream> //clog
 #include <camac/df/std_lcm.h>
 
 using namespace std;
@@ -32,7 +33,9 @@ int ADC333::StartCycle()
 {
 	try {
 		_parameters.cycling = true;
-		Start();
+		Reset();
+		UnHalt();
+		handleCamacCode(Trigger());
 	} catch (CamacError e) {
 		return e.code;
 	}
@@ -43,11 +46,28 @@ int ADC333::StartSingleRun()
 {
 	try {
 		_parameters.cycling = false;
-		Start();
+		Reset();
+		UnHalt();
 	} catch (CamacError & e) {
 		return e.code;
 	}
 	return CAMAC_CC_OK;
+}
+
+int ADC333::Trigger() 
+{
+	const camac_af_t af = CAMAC_MAKE_AF(25, 0);
+	return AF(af);	
+}
+
+int ADC333::Stop() 
+{
+	try {
+		Halt();
+	} catch(CamacError & e) {
+		return e.code;
+	}
+	return 0;
 }
 
 int ADC333::Read(unsigned  channel, std::vector<double> & data)
@@ -111,10 +131,18 @@ void ADC333::SetTickInNanoSeconds(unsigned ns)
 	handleCamacCode(CAMAC_CC_INVALID_ARG);
 }
 
-int ADC333::EnableChannels(bool channels[])
+int ADC333::EnableChannels(unsigned channels[])
 {
-	for (int i =0; i < CHAN_COUNT; ++i)
-		_parameters.channels[i].enabled = channels[i];
+	for (int i =0; i < CHAN_COUNT; ++i) {
+		assert(channels[i] >=0);
+		assert(channels[i] < 5);
+		bool enabled = channels[i] > 0;
+		_parameters.channels[i].enabled = enabled;
+		if (enabled)
+			_parameters.channels[i].gain = channels[i] - 1;
+		else 
+			_parameters.channels[i].gain = 0;
+	}
 	return CAMAC_CC_OK;
 }
 
@@ -124,7 +152,7 @@ ADC333::~ADC333() {
 
 void ADC333::WriteParameters(const Parameters & p)
 {
-	WriteStatus(p.GetStatus() | HALT_MASK);
+	Halt();
 	WriteLimits(p.GetLimits());
 }
 
@@ -193,13 +221,6 @@ void ADC333::UnHalt()
 	WriteStatus(ReadStatus() & ~HALT_MASK);
 }
 
-void ADC333::Start()
-{
-	Reset();
-	UnHalt();
-	const camac_af_t af = CAMAC_MAKE_AF(0, 25);
-	handleCamacCode(AF(af));
-}
 
 int ADC333::IsBusy()
 {
@@ -237,7 +258,7 @@ ADC333::Parameters::Parameters():
 
 bool ADC333::Parameters::SetStatus(unsigned  status)
 {
-	if (status & ~0x1F)
+	if (status & ~0x1FF)
 		return false;
 	writeChannelNumbers = bool(status >> 8 & 1);
 	cycling = bool(status >> 1 & 1);
@@ -258,7 +279,7 @@ unsigned ADC333::Parameters::GetStatus() const
 		if (channels[chIdx].enabled)
 			rv |= 1 << (4+chIdx);
 	}
-	assert((rv & ~0x1F) == 0);
+	assert((rv & ~0x1FF) == 0);
 	return true;
 }
 
@@ -282,7 +303,7 @@ unsigned ADC333::Parameters::GetLimits() const
 	}
 	assert(tick < 8);
 	rv |= tick << 8;
-	assert(!(rv & ~0x7F));
+	assert(!(rv & ~0x7FF));
 	return rv;
 }
 

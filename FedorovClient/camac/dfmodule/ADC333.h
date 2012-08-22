@@ -24,44 +24,55 @@
  */
 class ADC333: public dfCamacModuleBase {
 public:
+	enum {CHAN_COUNT=4};
 	ADC333();
 	using dfCamacModuleBase::Bind;
 	using dfCamacModuleBase::Init;
 	#ifndef CAMAC_MODULE_MOCK
 	using dfCamacModuleBase::GetFD;
 	#endif
-    /** Immediately starts cycling measurement.
-     *  Continues until stop signal is received.
-     *  The method returns immediately.
-     */
-    int StartCycle();
-    /** Prepares the module to start measurement on start signal.
-     *  The process will stop itself when no more space will be available in the buffer.
-     *  The method returns immediately.
-     */
-    int StartSingleRun();
+	/** Immediately starts cycling measurement.
+	*  Continues until stop signal is received.
+	*  Hardware signal STOP stops the measurement.
+	*  The method returns immediately.
+	*/
+	int StartCycle();
+	/** Prepares the module to start measurement on start signal.
+	*  The process will stop itself when no more space will be available in the buffer.
+	*  Actual measurement starts on hardware signal START.
+	*  The method returns immediately.
+	*/
+	int StartSingleRun();
 
-    //Reads data for channel
-    //If channel is disabled of invalid returns CAMAC_CC_INVALID_ARG
-    int Read(unsigned channel, std::vector<double> & data);
+	//Reads data for channel
+	//If channel is disabled of invalid returns CAMAC_CC_INVALID_ARG
+	int Read(unsigned channel, std::vector<double> & data);
 
-    /** Returns a period between measurements in microseconds.
-     * Returns 0 for external ticks.
-     * */
-    unsigned GetTickInNanoSeconds() const;
-    void SetTickInNanoSeconds(unsigned);
+	/** Returns a period between measurements in microseconds.
+	* Returns 0 for external ticks.
+	* */
+	unsigned GetTickInNanoSeconds() const;
+	void SetTickInNanoSeconds(unsigned);
 
-    /** Enables channel readout.
-     * Accepts array at least 4 booleans long.
-     */
-    int EnableChannels(bool channels[]);
+	/** Enables channel readout.
+	* Accepts array of at least CHAN_COUNT unsigned numbers.
+	* Following values are valid:
+	* 0 - disable channel
+	* 1..4 - set gain mode
+	*/
+	int EnableChannels(unsigned gains[CHAN_COUNT]);
 
-    /// Returns CAMAC_CC_BOOL if the module is busy.
-    int IsBusy();
+	/// Returns CAMAC_CC_BOOL if the module is busy.
+	int IsBusy();
 
+	int Stop();
+	
+	//Imitates hardware START signal.
+	int Trigger();
+	
 	virtual ~ADC333();
-	enum {CHAN_COUNT=4};
 private:
+	void Halt();
 	struct Parameters {
 		struct Channel {
 			bool     enabled;
@@ -83,17 +94,15 @@ private:
 	void ReadParameters(Parameters & p);
 	std::vector<uint16_t> _buffer;
 	void Reset();
-    void WriteStatus(unsigned status);
-    unsigned ReadStatus();
-    void WriteLimits(unsigned value);
-    unsigned ReadLimits();
-    void WriteRegister(unsigned index, unsigned value);
-    unsigned ReadRegister(unsigned index);
-    void Halt();
-    void Start();
-    void UnHalt();
-    //Reads data buffer and measurement parameters from module
-    void Readout();
+	void WriteStatus(unsigned status);
+	unsigned ReadStatus();
+	void WriteLimits(unsigned value);
+	unsigned ReadLimits();
+	void WriteRegister(unsigned index, unsigned value);
+	unsigned ReadRegister(unsigned index);
+	void UnHalt();
+	//Reads data buffer and measurement parameters from module
+	void Readout();
 };
 
 #endif /* ADC333_H_ */
