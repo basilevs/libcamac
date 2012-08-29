@@ -1,10 +1,3 @@
-/*
- * ADC333.h
- *
- *  Created on: 03.07.2012
- *      Author: gulevich
- */
-
 #ifndef ADC333_H_
 #define ADC333_H_
 
@@ -70,6 +63,8 @@ public:
 	//Imitates hardware START signal.
 	int Trigger();
 	
+	bool CheckLAM();
+		
 	virtual ~ADC333();
 private:
 	void Halt();

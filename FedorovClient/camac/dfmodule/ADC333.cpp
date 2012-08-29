@@ -18,7 +18,7 @@ struct CamacError {
 };
 
 static void handleCamacCode(int code) {
-	if (code & CAMAC_CC_ERRORS) {
+	if (code & CAMAC_CC_ERRORS & ~CAMAC_CC_NOT_Q) {
 		throw (CamacError){code};
 	}
 }
@@ -56,7 +56,7 @@ int ADC333::StartSingleRun()
 
 int ADC333::Trigger() 
 {
-	const camac_af_t af = CAMAC_MAKE_AF(25, 0);
+	const camac_af_t af = CAMAC_MAKE_AF(0, 25);
 	return AF(af);	
 }
 
@@ -154,6 +154,7 @@ void ADC333::WriteParameters(const Parameters & p)
 {
 	Halt();
 	WriteLimits(p.GetLimits());
+	WriteStatus(p.GetStatus());
 }
 
 void ADC333::Reset()
@@ -161,6 +162,11 @@ void ADC333::Reset()
 	_parameters.writeChannelNumbers = true;
 	WriteParameters(_parameters);
 	WriteRegister(8, START_ADDRESS);
+	assert(ReadRegister(8) == START_ADDRESS);
+	const camac_af_t clearLAM = CAMAC_MAKE_AF(0, 10);
+	handleCamacCode(AF(clearLAM));
+	const camac_af_t unblockLAM = CAMAC_MAKE_AF(0, 26);
+	handleCamacCode(AF(unblockLAM));
 	_buffer.clear();
 }
 
@@ -249,8 +255,18 @@ void ADC333::Readout()
 	}
 }
 
+bool ADC333::CheckLAM() 
+{
+	const camac_af_t af = CAMAC_MAKE_AF(0, 8);
+	int rv = AF(af);
+	handleCamacCode(rv);
+	if (rv & CAMAC_CC_NOT_Q)
+		return false;
+	return true;
+}
+
 ADC333::Parameters::Parameters():
-	tick(7), //32 us
+	tick(6), //32 us
 	writeChannelNumbers(true),
 	cycling(false)
 {
@@ -280,12 +296,12 @@ unsigned ADC333::Parameters::GetStatus() const
 			rv |= 1 << (4+chIdx);
 	}
 	assert((rv & ~0x1FF) == 0);
-	return true;
+	return rv;
 }
 
 bool ADC333::Parameters::SetLimits(unsigned  limits)
 {
-	if (limits & ~0x7F)
+	if (limits & ~0x7FF)
 		return false;
 	for (int i = 0; i < CHAN_COUNT; ++i) {
 		channels[i].gain = (limits >> (i * 2)) & 3;
