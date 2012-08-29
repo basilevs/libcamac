@@ -91,10 +91,10 @@ int ADC333::Read(unsigned  channel, std::vector<double> & data)
 		data.clear();
 		for (unsigned i = chanIdx; i < _buffer.size(); i+=chanCount) {
 			uint16_t code = _buffer[i];
-			if ((code << 13) & 1 ) {
+			if ((code >> 13) & 1 ) {
 				handleCamacCode(CAMAC_CC_VERIFICATION_ERROR);
 			}
-			if (code >> 13 & 1) {
+			if ((code >> 12) & 1) {
 				//Overload
 				data.push_back(numeric_limits<double>::infinity());
 				continue;
@@ -103,7 +103,10 @@ int ADC333::Read(unsigned  channel, std::vector<double> & data)
 				if (unsigned((code >> 14) & 3) != channel)
 					handleCamacCode(CAMAC_CC_VERIFICATION_ERROR);
 			}
-			data.push_back((code & 0x7F) << _parameters.channels[channel].gain);
+			int value = code & 0xFFF;
+			value -= 0x7FF;
+			double gain = 1 << _parameters.channels[channel].gain;
+			data.push_back(double(value) * gain );
 		}
 	} catch(CamacError &e) {
 		return e.code;

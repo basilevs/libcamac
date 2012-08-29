@@ -4,6 +4,7 @@
 #include <inttypes.h>
 #include <vector>
 #include <base.h>
+#include "tools/CamacErrorPrinter.h"
 
 /**
  * ADC333 protocol implementation.
