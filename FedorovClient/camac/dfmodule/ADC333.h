@@ -3,6 +3,7 @@
 
 #include <inttypes.h>
 #include <vector>
+#include <stdexcept>
 #include <base.h>
 #include "tools/CamacErrorPrinter.h"
 
@@ -18,6 +19,11 @@
  */
 class ADC333: public dfCamacModuleBase {
 public:
+	struct CamacError: public std::runtime_error {
+		int _code;
+		CamacError(int code, const std::string & message) : runtime_error(message), _code(code) {}
+		int code() const {return _code;}
+	};
 	enum {CHAN_COUNT=4};
 	ADC333();
 	using dfCamacModuleBase::Bind;
@@ -30,18 +36,18 @@ public:
 	*  Hardware signal STOP stops the measurement.
 	*  The method returns immediately.
 	*/
-	int StartCycle();
+	void StartCycle();
 	/** Prepares the module to start measurement on start signal.
 	*  The process will stop itself when no more space will be available in the buffer.
 	*  Actual measurement starts on hardware signal START.
 	*  The method returns immediately.
 	*/
-	int StartSingleRun();
+	void StartSingleRun();
 
 	//Reads data for channel
-	//If channel is disabled of invalid returns CAMAC_CC_INVALID_ARG
-	//Output vector is clread and filled with measurements in millivolts.
-	int Read(unsigned channel, std::vector<double> & data);
+	//If channel is disabled of invalid throws CamacError(CAMAC_CC_INVALID_ARG)
+	//Output vector is cleared and filled with measurements in millivolts.
+	void Read(unsigned channel, std::vector<double> & data);
 
 	/** Returns a period between measurements in microseconds.
 	* Returns 0 for external ticks.
@@ -57,13 +63,12 @@ public:
 	*/
 	int EnableChannels(unsigned gains[CHAN_COUNT]);
 
-	/// Returns CAMAC_CC_BOOL if the module is busy.
-	int IsBusy();
+	bool IsBusy();
 
-	int Stop();
+	void Stop();
 	
 	//Imitates hardware START signal.
-	int Trigger();
+	void Trigger();
 	
 	bool CheckLAM();
 		

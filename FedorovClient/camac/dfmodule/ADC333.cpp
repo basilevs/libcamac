@@ -2,7 +2,11 @@
 #include <assert.h>
 #include <limits>
 #include <iostream> //clog
+#include <sstream>
 #include <camac/df/std_lcm.h>
+
+#include <tools/CamacErrorPrinter.h>
+
 
 using namespace std;
 
@@ -13,13 +17,11 @@ enum {CAMAC_CC_OK = 0};
 #endif
 
 
-struct CamacError {
-	int code;
-};
-
 static void handleCamacCode(int code) {
 	if (code & CAMAC_CC_ERRORS & ~CAMAC_CC_NOT_Q) {
-		throw (CamacError){code};
+		ostringstream message;
+		message << CamacErrorPrinter(code);
+		throw ADC333::CamacError(code, message.str());
 	}
 }
 
@@ -29,88 +31,68 @@ ADC333::ADC333():
 
 }
 
-int ADC333::StartCycle()
+void ADC333::StartCycle()
 {
-	try {
-		_parameters.cycling = true;
-		Reset();
-		UnHalt();
-		handleCamacCode(Trigger());
-	} catch (CamacError e) {
-		return e.code;
-	}
-	return CAMAC_CC_OK;
+	_parameters.cycling = true;
+	Reset();
+	UnHalt();
+	Trigger();
 }
 
-int ADC333::StartSingleRun()
+void ADC333::StartSingleRun()
 {
-	try {
-		_parameters.cycling = false;
-		Reset();
-		UnHalt();
-	} catch (CamacError & e) {
-		return e.code;
-	}
-	return CAMAC_CC_OK;
+	_parameters.cycling = false;
+	Reset();
+	UnHalt();
 }
 
-int ADC333::Trigger() 
+void ADC333::Trigger() 
 {
 	const camac_af_t af = CAMAC_MAKE_AF(0, 25);
-	return AF(af);	
+	handleCamacCode(AF(af));	
 }
 
-int ADC333::Stop() 
+void ADC333::Stop() 
 {
-	try {
-		Halt();
-	} catch(CamacError & e) {
-		return e.code;
-	}
-	return 0;
+	Halt();
 }
 
-int ADC333::Read(unsigned  channel, std::vector<double> & data)
+void ADC333::Read(unsigned  channel, std::vector<double> & data)
 {
-	try {
-		if (_buffer.empty())
-			Readout();
-		unsigned chanCount = 0;
-		unsigned chanIdx =  CHAN_COUNT;
-		for (unsigned i = 0; i < CHAN_COUNT; ++i) {
-			if (_parameters.channels[i].enabled) {
-				if (i==channel) {
-					chanIdx = chanCount;
-				}
-				chanCount ++;
-			} else {
-				if (i == channel)
-					handleCamacCode(CAMAC_CC_INVALID_ARG);
+	if (_buffer.empty())
+		Readout();
+	unsigned chanCount = 0;
+	unsigned chanIdx =  CHAN_COUNT;
+	for (unsigned i = 0; i < CHAN_COUNT; ++i) {
+		if (_parameters.channels[i].enabled) {
+			if (i==channel) {
+				chanIdx = chanCount;
 			}
+			chanCount ++;
+		} else {
+			if (i == channel)
+				handleCamacCode(CAMAC_CC_INVALID_ARG);
 		}
-		data.clear();
-		for (unsigned i = chanIdx; i < _buffer.size(); i+=chanCount) {
-			uint16_t code = _buffer[i];
-			if ((code >> 13) & 1 ) {
+	}
+	data.clear();
+	for (unsigned i = chanIdx; i < _buffer.size(); i+=chanCount) {
+		uint16_t code = _buffer[i];
+		if ((code >> 13) & 1 ) {
+			handleCamacCode(CAMAC_CC_VERIFICATION_ERROR);
+		}
+		if ((code >> 12) & 1) {
+			//Overload
+			data.push_back(numeric_limits<double>::infinity());
+			continue;
+		}
+		if (_parameters.writeChannelNumbers) {
+			if (unsigned((code >> 14) & 3) != channel)
 				handleCamacCode(CAMAC_CC_VERIFICATION_ERROR);
-			}
-			if ((code >> 12) & 1) {
-				//Overload
-				data.push_back(numeric_limits<double>::infinity());
-				continue;
-			}
-			if (_parameters.writeChannelNumbers) {
-				if (unsigned((code >> 14) & 3) != channel)
-					handleCamacCode(CAMAC_CC_VERIFICATION_ERROR);
-			}
-			double value = int(code & 0xFFF) - 0x7FF;
-			double gain = 1 << _parameters.channels[channel].gain;
-			data.push_back(value / gain );
 		}
-	} catch(CamacError &e) {
-		return e.code;
+		double value = int(code & 0xFFF) - 0x7FF;
+		double gain = 1 << _parameters.channels[channel].gain;
+		data.push_back(value / gain );
 	}
-	return CAMAC_CC_OK;
 }
 
 static unsigned tickToNanoSeconds[8] = {500, 1000, 2000, 4000, 8000, 16000, 32000, 0};
@@ -212,10 +194,10 @@ void ADC333::ReadParameters(Parameters & p)
 {
 	unsigned status=ReadStatus(), limits = ReadLimits();
 	if (!p.SetStatus(status)) {
-		throw (CamacError){CAMAC_CC_VERIFICATION_ERROR};
+		handleCamacCode(CAMAC_CC_VERIFICATION_ERROR);
 	}
 	if (!p.SetLimits(limits)) {
-		throw (CamacError){CAMAC_CC_VERIFICATION_ERROR};
+		handleCamacCode(CAMAC_CC_VERIFICATION_ERROR);
 	}
 }
 
@@ -230,15 +212,11 @@ void ADC333::UnHalt()
 }
 
 
-int ADC333::IsBusy()
+bool ADC333::IsBusy()
 {
-	try {
-		if (ReadStatus() & BUSY_MASK)
-			return CAMAC_CC_BOOL;
-		return CAMAC_CC_OK;
-	} catch (CamacError & e) {
-		return e.code;
-	}
+	if (ReadStatus() & BUSY_MASK)
+		return true;
+	return false;
 }
 
 void ADC333::Readout()
