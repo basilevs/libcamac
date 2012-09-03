@@ -103,10 +103,9 @@ int ADC333::Read(unsigned  channel, std::vector<double> & data)
 				if (unsigned((code >> 14) & 3) != channel)
 					handleCamacCode(CAMAC_CC_VERIFICATION_ERROR);
 			}
-			int value = code & 0xFFF;
-			value -= 0x7FF;
+			double value = int(code & 0xFFF) - 0x7FF;
 			double gain = 1 << _parameters.channels[channel].gain;
-			data.push_back(double(value) * gain );
+			data.push_back(value / gain );
 		}
 	} catch(CamacError &e) {
 		return e.code;

@@ -40,6 +40,7 @@ public:
 
 	//Reads data for channel
 	//If channel is disabled of invalid returns CAMAC_CC_INVALID_ARG
+	//Output vector is clread and filled with measurements in millivolts.
 	int Read(unsigned channel, std::vector<double> & data);
 
 	/** Returns a period between measurements in microseconds.
