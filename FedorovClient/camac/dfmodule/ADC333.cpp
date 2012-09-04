@@ -1,7 +1,6 @@
 #include "ADC333.h"
 #include <assert.h>
 #include <limits>
-#include <iostream> //clog
 #include <sstream>
 #include <camac/df/std_lcm.h>
 
@@ -75,6 +74,7 @@ void ADC333::Read(unsigned  channel, std::vector<double> & data)
 		}
 	}
 	data.clear();
+	data.reserve(_buffer.size() / chanCount + 1);
 	for (unsigned i = chanIdx; i < _buffer.size(); i+=chanCount) {
 		uint16_t code = _buffer[i];
 		if ((code >> 13) & 1 ) {
@@ -224,15 +224,25 @@ void ADC333::Readout()
 	Halt();
 	unsigned status = ReadStatus();
 	ReadParameters(_parameters);
-	long stop_position = -1;
-	if (!(status & CYCLIC_MASK) || !(status & OVERFILL_MASK)) {
-		stop_position=ReadRegister(8); // Current position
+	int count = START_ADDRESS;
+	const int stop_position = ReadRegister(8);
+	if (status & CYCLIC_MASK) {
+		if (status & OVERFILL_MASK) {
+			count = START_ADDRESS + 1;
+		} else {
+			WriteRegister(8, START_ADDRESS);
+			count = START_ADDRESS - stop_position;
+		}
+	} else {
 		WriteRegister(8, START_ADDRESS);
+		count = START_ADDRESS - stop_position;
 	}
 	_buffer.clear();
-	for (long i = START_ADDRESS; i > stop_position; --i) {
+	_buffer.reserve(count);
+	for (long i = 0; i < count; ++i)
 		_buffer.push_back(ReadRegister(0));
-	}
+	const int stop_position_verify = ReadRegister(8);
+	assert(stop_position == stop_position_verify);
 }
 
 bool ADC333::CheckLAM() 
