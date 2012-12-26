@@ -2,6 +2,7 @@
 #include "CamacServer.h"
 
 #include <stdexcept>
+#include <iostream>
 
 #include <sys/time.h>
 #include <assert.h>
@@ -15,6 +16,7 @@
 
 
 using namespace Camac;
+using namespace std;
 
 Camac::AF convert(const camac_af_t & iAF) {
 	Camac::AF rv;
@@ -69,9 +71,9 @@ int dfCamacModuleBase::Bind(const camac_address& addr, df_timeout_t* , int)
 
 		_module = &(getModule(server, addr.iface, addr.crate, addr.station));
 		_station = addr.station;
-	} catch (exception & e) {
-		cerr << "Bind to address " << addr.iface << "/" << 
-addr.crate << "/" << addr.station << " failed: " << e.what() 
+	} catch (std::exception & e) {
+		cerr << "Bind to address " << (int)addr.iface << "/" << 
+(int)addr.crate << "/" << (int)addr.station << " failed: " << e.what() 
 << endl;
 		return -1;
 	}
