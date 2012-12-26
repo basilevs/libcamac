@@ -11,7 +11,7 @@ CPPFLAGS+=$(addprefix -I,$(INCLUDE))
 CHEBLAKOV?=$(CAMAC_ABSTRACT_BASE)../../cheblakov
 
 
-VPATH+=$(CAMAC_ABSTRACT_BASE)src $(CAMAC_ABSTRACT_BASE)FedorovClient/camac/dfmodule/tools $(CAMAC_ABSTRACT_BASE)FedorovClient/camac/dfmodule
+VPATH+=$(CAMAC_ABSTRACT_BASE)src $(CAMAC_ABSTRACT_BASE)FedorovClient/camac/dfmodule/tools $(CAMAC_ABSTRACT_BASE)FedorovClient/camac/dfmodule $(CAMAC_ABSTRACT_BASE)FedorovClient/camac/df
 
 DEPGEN=$(CC) -M $(CPPFLAGS) $< | sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' > $@
 
