@@ -1,6 +1,7 @@
 #include <boost/python.hpp>
 
 #include "CamacServer.h"
+#include "lecroy2249.h"
 
 using namespace boost::python;
 using namespace std;
@@ -53,6 +54,9 @@ class Module {
 	void raiseIfError(Result res) {
 		if ((res & ~_ignoredErrors) & Camac::CC_ERRORS)
 			throw Error(res);
+	}
+	operator Camac::Module&() {
+		return _module;
 	}
 	void ignoreErrors(int errors) {_ignoredErrors = errors;}
 	void af(const AF & afc) {raiseIfError(_module.AFC(afc));}
@@ -154,5 +158,7 @@ BOOST_PYTHON_MODULE(pycamac)
 	class_<PyCamac::Server>("Server")
 		.def("getInterface", &PyCamac::Server::getInterface);
 
-	
+	class_<LeCroy2249>("LeCroy2249", init<Camac::Module&>())
+		.def("read", &LeCroy2249::read)
+		.def("reset", &LeCroy2249::reset);
 }
