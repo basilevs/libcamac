@@ -146,7 +146,8 @@ void ADC333::Reset()
 	_parameters.writeChannelNumbers = true;
 	WriteParameters(_parameters);
 	WriteRegister(8, START_ADDRESS);
-	assert(ReadRegister(8) == START_ADDRESS);
+	if (ReadRegister(8) != START_ADDRESS)
+		handleCamacCode(CAMAC_CC_VERIFICATION_ERROR);
 	const camac_af_t clearLAM = CAMAC_MAKE_AF(0, 10);
 	handleCamacCode(AF(clearLAM));
 	const camac_af_t unblockLAM = CAMAC_MAKE_AF(0, 26);
