@@ -5,7 +5,8 @@ from os.path import join
 sources = map(lambda x: join("src", x+".cpp"), (
 	"CamacServer",
 	"MamkinServer",
-	"pycamac"
+	"pycamac",
+	"lecroy2249"
 ))
 
 
