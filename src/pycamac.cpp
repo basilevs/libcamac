@@ -10,6 +10,7 @@ namespace PyCamac {
 typedef Camac::Result Result;
 typedef Camac::Timeout Timeout;
 typedef Camac::AF AF;
+using Camac::CC_BOOL;
 typedef uint16_t u16_t;
 typedef uint32_t u32_t;
 
@@ -55,7 +56,7 @@ class Module {
 		if ((res & ~_ignoredErrors) & Camac::CC_ERRORS)
 			throw Error(res);
 	}
-	operator Camac::Module&() {
+	operator Camac::Module&() const {
 		return _module;
 	}
 	void ignoreErrors(int errors) {_ignoredErrors = errors;}
@@ -67,6 +68,12 @@ class Module {
 		raiseIfError(_module.AFR(af, rv));
 		return rv;
 	}
+	bool waitLAM(float timeout = 0) {
+		int rv = _module.waitLAM(timeout);
+		raiseIfError(rv);
+		return rv & CC_BOOL ?  true : false;
+	}
+	
 	u32_t afr24(const AF & af) {
 		u32_t rv = 0;	
 		raiseIfError(_module.AFR(af, rv));
@@ -147,6 +154,7 @@ BOOST_PYTHON_MODULE(pycamac)
 		.def("af", &PyCamac::Module::af)
 		.def("afr16", &PyCamac::Module::afr16)
 		.def("afr24", &PyCamac::Module::afr24)
+		.def("waitLAM", &PyCamac::Module::waitLAM)
 		.def("ignoreErrors", &PyCamac::Module::ignoreErrors)
 ;
 	class_<PyCamac::Crate>("Crate", no_init)
@@ -158,7 +166,7 @@ BOOST_PYTHON_MODULE(pycamac)
 	class_<PyCamac::Server>("Server")
 		.def("getInterface", &PyCamac::Server::getInterface);
 
-	class_<LeCroy2249>("LeCroy2249", init<Camac::Module&>())
+	class_<LeCroy2249>("LeCroy2249", init<PyCamac::Module>())
 		.def("read", &LeCroy2249::read)
 		.def("reset", &LeCroy2249::reset);
 }
