@@ -167,6 +167,7 @@ BOOST_PYTHON_MODULE(pycamac)
 		.def("getInterface", &PyCamac::Server::getInterface);
 
 	class_<LeCroy2249>("LeCroy2249", init<PyCamac::Module>())
+		.def("ignoreQ", &LeCroy2249::ignoreQ)
 		.def("read", &LeCroy2249::read)
 		.def("reset", &LeCroy2249::reset);
 }

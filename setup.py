@@ -18,7 +18,7 @@ module1 = Extension(
 )
 
 setup (name = 'pycamac',
-		version = '0.1',
+		version = '0.2',
 		description = 'Python CAMAC API',
 		ext_modules = [module1])
 

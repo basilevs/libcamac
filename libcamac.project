@@ -16,6 +16,12 @@
     <File Name="src/FedorovServer.h"/>
     <File Name="src/MamkinServer.h"/>
     <File Name="src/actools.h"/>
+    <File Name="src/MamkinServer.cpp"/>
+    <File Name="src/CamacServer.cpp"/>
+    <File Name="src/FedorovServer.cpp"/>
+    <File Name="src/pycamac.cpp"/>
+    <File Name="src/base.cpp"/>
+    <File Name="src/rc2test.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="libcamac">
     <File Name="Makefile"/>
@@ -38,7 +44,8 @@
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="" IntermediateDirectory="./Debug" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
-        <![CDATA[]]>
+        <![CDATA[
+      ]]>
       </Environment>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
@@ -75,6 +82,7 @@
       <General OutputFile="" IntermediateDirectory="./Release" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[
+      
       
       
       ]]>

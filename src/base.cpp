@@ -32,6 +32,10 @@ void convertTimeoutToFedorov(Timeout left,  df_timeout_t * oTimeout) {
 		*oTimeout = DF_TIMEOUT_INF;
 		return;
 	}
+	if (left < 0) {
+		*oTimeout = 0;
+		return;
+	}		
 	*oTimeout = left * 1000;
 }
 
@@ -45,7 +49,7 @@ Timeout convertTimeoutFromFedorov(const df_timeout_t * timeout) {
 		return std::numeric_limits<Timeout>::infinity();
 	if (*timeout == DF_TIMEOUT_0)
 		return 0;
-	return *timeout / 1000;
+	return float(*timeout) / 1000;
 }
 
 dfCamacModuleBase::dfCamacModuleBase(const char* _type,
@@ -186,6 +190,7 @@ int dfCamacModuleBase::WaitLAM(df_timeout_t* timeout) {
 	}
 	Timeout t = convertTimeoutFromFedorov(timeout);
 	if (t <= 0) {
+		convertTimeoutToFedorov(0, timeout);
 		return _module->waitLAM(0);
 	}
 	double targetTime = t + now();

@@ -14,15 +14,17 @@ LeCroy2249::LeCroy2249(Module& module):
 		throw runtime_error("Bad camac response while resetting module LeCroy2249");
 }
 
-
+void LeCroy2249::ignoreQ(bool ignore) {_ignoreQ = ignore;}
 
 uint16_t LeCroy2249::read(uint8_t channel)
 {
 	AF af(channel, 0);
 	uint16_t rv = 0;
 	Result rc = _module.AFR(af, rv);
+	if (_ignoreQ)
+		rc &= ~CC_NOT_Q;
 	if (rc) {		
-		throw runtime_error("Bad camac rsponse while reading module LeCroy2249");
+		throw runtime_error("Bad camac response while reading module LeCroy2249");
 	}
 	return rv;
 }
