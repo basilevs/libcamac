@@ -41,3 +41,12 @@ LeCroy2249::~LeCroy2249()
 {
 }
 
+bool LeCroy2249::checkLAM()
+{
+	static const AF af(0,8);
+	Result rc = _module.AFC(af);
+	if (rc & ~CC_NOT_Q)
+		throw runtime_error("Bad camac response while checking LAM in module LeCroy2249");
+	return (rc & CC_NOT_Q) ? false : true;	
+}
+
