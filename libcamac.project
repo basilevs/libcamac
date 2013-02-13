@@ -5,6 +5,71 @@
       <![CDATA[00010001N0005Debug000000000000]]>
     </Plugin>
   </Plugins>
+  <VirtualDirectory Name="FedorovClient">
+    <VirtualDirectory Name="camac">
+      <VirtualDirectory Name="dfmodule">
+        <VirtualDirectory Name="tools">
+          <File Name="FedorovClient/camac/dfmodule/tools/CamacErrorPrinter.cpp"/>
+          <File Name="FedorovClient/camac/dfmodule/tools/bmyu_out_err.cpp"/>
+          <File Name="FedorovClient/camac/dfmodule/tools/CamacAddressParser.cpp"/>
+          <File Name="FedorovClient/camac/dfmodule/tools/bmyu_out_err.h"/>
+          <File Name="FedorovClient/camac/dfmodule/tools/CamacErrorPrinter.h"/>
+          <File Name="FedorovClient/camac/dfmodule/tools/Makefile"/>
+          <File Name="FedorovClient/camac/dfmodule/tools/CamacAddressParser.h"/>
+          <File Name="FedorovClient/camac/dfmodule/tools/lam_wait.h"/>
+          <File Name="FedorovClient/camac/dfmodule/tools/sk_diagnostics.h"/>
+        </VirtualDirectory>
+        <File Name="FedorovClient/camac/dfmodule/U0302.cpp"/>
+        <File Name="FedorovClient/camac/dfmodule/TDC_C0301.cpp"/>
+        <File Name="FedorovClient/camac/dfmodule/ADC333.cpp"/>
+        <File Name="FedorovClient/camac/dfmodule/Coincide_C0308.cpp"/>
+        <File Name="FedorovClient/camac/dfmodule/HVS_B0307.cpp"/>
+        <File Name="FedorovClient/camac/dfmodule/bmyuCamacModuleCZSensitive.cpp"/>
+        <File Name="FedorovClient/camac/dfmodule/Discriminator_D0302.cpp"/>
+        <File Name="FedorovClient/camac/dfmodule/DelayPulseShaper_L0323.cpp"/>
+        <File Name="FedorovClient/camac/dfmodule/Counter_S0301.cpp"/>
+        <File Name="FedorovClient/camac/dfmodule/LeCroy_private.cpp"/>
+        <File Name="FedorovClient/camac/dfmodule/Attenuator_A0605.cpp"/>
+        <File Name="FedorovClient/camac/dfmodule/LeCroy_public.cpp"/>
+        <File Name="FedorovClient/camac/dfmodule/Lock_U0301.cpp"/>
+        <File Name="FedorovClient/camac/dfmodule/IntegralVoltmeter_C0309.cpp"/>
+        <File Name="FedorovClient/camac/dfmodule/CAS.cpp"/>
+        <File Name="FedorovClient/camac/dfmodule/HVS_B0308.cpp"/>
+        <File Name="FedorovClient/camac/dfmodule/QDC_C0312.cpp"/>
+        <File Name="FedorovClient/camac/dfmodule/GTP_B0609.cpp"/>
+        <File Name="FedorovClient/camac/dfmodule/HVS_B0307.h"/>
+        <File Name="FedorovClient/camac/dfmodule/Discriminator_D0302.h"/>
+        <File Name="FedorovClient/camac/dfmodule/Coincide_C0308.h"/>
+        <File Name="FedorovClient/camac/dfmodule/IntegralVoltmeter_C0309.h"/>
+        <File Name="FedorovClient/camac/dfmodule/Counter_S0301.h"/>
+        <File Name="FedorovClient/camac/dfmodule/Attenuator_A0605.h"/>
+        <File Name="FedorovClient/camac/dfmodule/HVS_B0308.h"/>
+        <File Name="FedorovClient/camac/dfmodule/bmyuCamacModuleCommon.h"/>
+        <File Name="FedorovClient/camac/dfmodule/LIZA_B0608.h"/>
+        <File Name="FedorovClient/camac/dfmodule/TDC_C0309.h"/>
+        <File Name="FedorovClient/camac/dfmodule/CAS_128G.h"/>
+        <File Name="FedorovClient/camac/dfmodule/U0302.h"/>
+        <File Name="FedorovClient/camac/dfmodule/CAS.h"/>
+        <File Name="FedorovClient/camac/dfmodule/DelayPulseShaper_L0323.h"/>
+        <File Name="FedorovClient/camac/dfmodule/QDC_C0312.h"/>
+        <File Name="FedorovClient/camac/dfmodule/bmyuCamacModuleISensitive.h"/>
+        <File Name="FedorovClient/camac/dfmodule/bmyuCamacModuleLAMable.h"/>
+        <File Name="FedorovClient/camac/dfmodule/Coincide_L0306_4A.h"/>
+        <File Name="FedorovClient/camac/dfmodule/base.h"/>
+        <File Name="FedorovClient/camac/dfmodule/ZIF_L0323.h"/>
+        <File Name="FedorovClient/camac/dfmodule/Lock_U0301.h"/>
+        <File Name="FedorovClient/camac/dfmodule/Makefile"/>
+        <File Name="FedorovClient/camac/dfmodule/bmyuCamacModuleCZSensitive.h"/>
+        <File Name="FedorovClient/camac/dfmodule/ModuleMap.h"/>
+        <File Name="FedorovClient/camac/dfmodule/bmyuCamacModuleNotSensitive.h"/>
+        <File Name="FedorovClient/camac/dfmodule/CAS_16G.h"/>
+        <File Name="FedorovClient/camac/dfmodule/GTP_B0609.h"/>
+        <File Name="FedorovClient/camac/dfmodule/TDC_C0301.h"/>
+        <File Name="FedorovClient/camac/dfmodule/LeCroy.h"/>
+        <File Name="FedorovClient/camac/dfmodule/ADC333.h"/>
+      </VirtualDirectory>
+    </VirtualDirectory>
+  </VirtualDirectory>
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="include">
@@ -46,6 +111,13 @@
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[
       
+      
+      
+      
+      
+      
+      
+      
       ]]>
       </Environment>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
@@ -83,6 +155,13 @@
       <General OutputFile="" IntermediateDirectory="./Release" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[
+      
+      
+      
+      
+      
+      
+      
       
       
       
