@@ -73,6 +73,7 @@ public:
 	bool CheckLAM();
 		
 	virtual ~ADC333();
+	void Reset();
 private:
 	void Halt();
 	struct Parameters {
@@ -95,7 +96,6 @@ private:
 	void WriteParameters(const Parameters & p);
 	void ReadParameters(Parameters & p);
 	std::vector<uint16_t> _buffer;
-	void Reset();
 	void WriteStatus(unsigned status);
 	unsigned ReadStatus();
 	void WriteLimits(unsigned value);

@@ -16,11 +16,11 @@ enum {CAMAC_CC_OK = 0};
 #endif
 
 
-static void handleCamacCode(int code) {
+static void handleCamacCode(int code, const string & message = "Invalid CAMAC response from ADC333") {
 	if (code & CAMAC_CC_ERRORS & ~CAMAC_CC_NOT_Q) {
-		ostringstream message;
-		message << CamacErrorPrinter(code);
-		throw ADC333::CamacError(code, message.str());
+		ostringstream tmp;
+		tmp << message << ": " << CamacErrorPrinter(code);
+		throw ADC333::CamacError(code, tmp.str());
 	}
 }
 
@@ -147,11 +147,11 @@ void ADC333::Reset()
 	WriteParameters(_parameters);
 	WriteRegister(8, START_ADDRESS);
 	if (ReadRegister(8) != START_ADDRESS)
-		handleCamacCode(CAMAC_CC_VERIFICATION_ERROR);
+		handleCamacCode(CAMAC_CC_VERIFICATION_ERROR, "Failed to validate written start address in ADC333");
 	const camac_af_t clearLAM = CAMAC_MAKE_AF(0, 10);
-	handleCamacCode(AF(clearLAM));
+	handleCamacCode(AF(clearLAM), "Failed to clear LAM in ADC333");
 	const camac_af_t unblockLAM = CAMAC_MAKE_AF(0, 26);
-	handleCamacCode(AF(unblockLAM));
+	handleCamacCode(AF(unblockLAM), "Failed to unblock LAM in ADC333");
 	_buffer.clear();
 }
 
@@ -180,7 +180,7 @@ unsigned ADC333::ReadRegister(unsigned index) {
 	const camac_af_t af = CAMAC_MAKE_AF(index, 0);
 	u16_t tmp = 0;
 	int rv = AF(af, &tmp);
-	handleCamacCode(rv);
+	handleCamacCode(rv, "Failed to read ADC333 register");
 	return tmp;
 }
 
@@ -188,7 +188,7 @@ void ADC333::WriteRegister(unsigned  index, unsigned value)
 {
 	const camac_af_t af = CAMAC_MAKE_AF(index, 16);
 	u16_t tmp = value;
-	handleCamacCode(AF(af, &tmp));
+	handleCamacCode(AF(af, &tmp), "Failed to write register of ADC333");
 }
 
 void ADC333::ReadParameters(Parameters & p)
